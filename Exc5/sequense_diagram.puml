@@ -1,0 +1,29 @@
+@startuml
+actor Client
+participant "Shop API" as API
+participant "Cache" as Cache
+participant "Database" as DB
+
+== Чтение списка заказов ==
+Client -> API : Запрос списка заказов
+API -> Cache : Проверка кэша
+alt Кэш найден
+    Cache -> API : Возврат кэшированных данных
+    API -> Client : Возврат списка заказов
+else Кэш не найден
+    Cache -> API : Данные не найдены
+    API -> DB : Запрос списка заказов
+    DB -> API : Возврат списка заказов
+    API -> Cache : Кэширование данных
+    Cache -> API : Подтверждение кэширования
+    API -> Client : Возврат списка заказов
+end
+
+== Запись об изменении статуса заказа ==
+Client -> API : Запрос изменения статуса заказа
+API -> DB : Обновление статуса заказа
+DB -> API : Подтверждение обновления
+API -> Cache : Инвалидация кэша
+Cache -> API : Подтверждение инвалидации
+API -> Client : Подтверждение изменения статуса заказа
+@enduml
